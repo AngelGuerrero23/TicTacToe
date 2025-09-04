@@ -1,4 +1,6 @@
 using TicTacToe.Components;
+using TicTacToe.DAL;
+using Microsoft.EntityFrameworkCore;
 
 namespace TicTacToe
 {
@@ -8,10 +10,20 @@ namespace TicTacToe
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+
+
+             //Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            //Para obtener el ConStr para usarlo en el contexto
+            var ConStr = builder.Configuration.GetConnectionString("SqlConStr");
+
+            //Para agregar el contexto al builder con el ConStr
+
+            builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlite(ConStr));
+
+            /*
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -31,6 +43,7 @@ namespace TicTacToe
                 .AddInteractiveServerRenderMode();
 
             app.Run();
+            */
         }
     }
 }
