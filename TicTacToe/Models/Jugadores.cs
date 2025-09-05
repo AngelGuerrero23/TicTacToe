@@ -14,6 +14,6 @@ namespace TicTacToe.Models
 
         public string JugadorName { get; set; } = null!;
 
-        public int partidas { get; set; }
+        public int partida { get; set; }
     }
 }
