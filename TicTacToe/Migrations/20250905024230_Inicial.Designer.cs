@@ -11,7 +11,7 @@ using TicTacToe.DAL;
 namespace TicTacToe.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20250905013251_Inicial")]
+    [Migration("20250905024230_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />

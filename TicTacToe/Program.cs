@@ -20,20 +20,25 @@ namespace TicTacToe
             var ConStr = builder.Configuration.GetConnectionString("SqlConStr");
 
             //Para agregar el contexto al builder con el ConStr
-            builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(builder.Configuration.GetConnectionString(ConStr)));
+            builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(ConStr));
 
             
             var app = builder.Build();
             
             // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
-
+            app.UseAuthorization();
             app.UseAntiforgery();
 
             app.MapStaticAssets();
