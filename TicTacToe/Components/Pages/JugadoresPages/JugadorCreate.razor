@@ -1,0 +1,73 @@
+﻿@page "/Jugador/Create"
+@using Microsoft.EntityFrameworkCore
+@using TicTacToe.DAL
+@inject JugadoresService jugadoresService
+@rendermode InteractiveServer
+@inject NavigationManager navigationManager
+
+@* MainLayout.razor *@
+<link href="app.css" rel="stylesheet" />
+
+<PageTitle>Create</PageTitle>
+<EditForm Model="Jugador" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator/>
+
+        <div class="container">
+            <div class="card shadow-lg">
+                <div class="card-header text-center">
+                    <h5 class="card-title">Crear Jugador</h5>
+                </div>
+                <div class="card-body">
+                    @*JugadorId*@
+                    <div class="mb-3">
+                        <label class="form-label"><strong>JugadorId</strong></label>
+                        <InputNumber class="form-control" @bind-value="Jugador.JugadorId" readonly></InputNumber>
+                    </div>
+                    @*JugadorName*@
+                <div class="mb-3">
+                        <label class="form-label"><strong>JugadorName</strong></label>
+                        <InputText class="form-control" @bind-value="Jugador.JugadorName"></InputText>
+                        <ValidationMessage For="(()=>Jugador.JugadorName)"/>
+                    </div>
+                    @*Partidas*@
+                <div class="mb-3">
+                        <label class="form-label"><strong>Partidas</strong></label>
+                        <InputNumber class="form-control" @bind-value="Jugador.partida"></InputNumber>
+                        <ValidationMessage For="(()=>Jugador.partida)"></ValidationMessage>
+                    </div>
+                </div>
+                @*footer*@
+                <div class="card-footer text-center mt-2">
+                    <a href="/Jugador/Index" class="btn btn-secondary"><span class="bi bi-arrow-left"></span>Volver</a>
+                    <button type="submit" class="btn btn-primary bi bi-floppy">Guardar</button>
+                </div>
+            </div>
+        </div>
+</EditForm>
+@code {
+    [Parameter]
+    public int JugadorId { get; set; }
+
+    public Jugadores Jugador { get; set; } = new Jugadores();
+    public string Mensaje { get; set; } = string.Empty;
+    public List<Jugadores> ListaJugadores { get; set; } = new List<Jugadores>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+    }
+
+    public async Task Guardar()
+    {
+        var creado = await jugadoresService.Guardar(Jugador);
+
+        if (creado)
+        {
+            navigationManager.NavigateTo("/Jugador/Index");
+        }
+        else
+        {
+            Mensaje = "No se pudo guardar correctamente";
+        }
+    }
+}

@@ -1,6 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using TicTacToe.Components;
 using TicTacToe.DAL;
-using Microsoft.EntityFrameworkCore;
+using TicTacToe.Services;
 
 namespace TicTacToe
 {
@@ -22,7 +23,11 @@ namespace TicTacToe
             //Para agregar el contexto al builder con el ConStr
             builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(ConStr));
 
-            
+            //Inyeccion del service
+            builder.Services.AddScoped<Contexto>();
+            builder.Services.AddScoped<JugadoresService>();
+
+
             var app = builder.Build();
             
             // Configure the HTTP request pipeline.
@@ -37,8 +42,6 @@ namespace TicTacToe
             }
 
             app.UseHttpsRedirection();
-            app.UseAuthentication();
-            app.UseAuthorization();
             app.UseAntiforgery();
 
             app.MapStaticAssets();
