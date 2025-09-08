@@ -14,6 +14,9 @@ namespace TicTacToe.Models
 
         public string JugadorName { get; set; } = null!;
 
+        [Range(0, int.MaxValue, ErrorMessage="Las partidas deben ser  0 o mayor")]
         public int partida { get; set; }
+
+       
     }   
 }

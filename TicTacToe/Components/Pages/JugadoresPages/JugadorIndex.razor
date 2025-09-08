@@ -60,11 +60,21 @@ else
 </div>
 
 @code {
+
+
+
     private List<Jugadores>? listaJugadores;
 
     protected override async Task OnInitializedAsync()
     {
-        listaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+        try
+        {
+            listaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+        }catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
     }
 
     private void Editar(int id)
@@ -74,11 +84,18 @@ else
 
     private async Task Eliminar(int id)
     {
-        var eliminado = await jugadoresService.Eliminar(id);
-        if (eliminado)
+        try
         {
-            listaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
-            StateHasChanged();
+            var eliminado = await jugadoresService.Eliminar(id);
+            if (eliminado)
+            {
+                listaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+                //StateHasChanged();
+            }
+        }catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 }
+    
