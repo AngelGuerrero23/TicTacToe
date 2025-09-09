@@ -52,10 +52,10 @@
     public string Mensaje { get; set; } = string.Empty;
     public List<Jugadores> ListaJugadores { get; set; } = new List<Jugadores>();
 
-    protected override async Task OnInitializedAsync()
-    {
-        ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
-    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+    // }
 
     public async Task Guardar()
     {
