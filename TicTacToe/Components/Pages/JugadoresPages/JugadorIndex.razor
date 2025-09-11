@@ -1,26 +1,64 @@
 ﻿@page "/Jugador/Index"
 @using TicTacToe.Models
 @inject JugadoresService jugadoresService
+
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
 @* MainLayout.razor *@
 <link href="app.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <PageTitle>Jugadores</PageTitle>
 
 <h3 class="mb-3">Listado de Jugadores</h3>
 
-@if (listaJugadores == null)
+@if (ListaJugadores == null)
 {
     <p><em>Cargando jugadores...</em></p>
 }
-else if (!listaJugadores.Any())
+else if (!ListaJugadores.Any())
 {
     <div class="alert alert-info">No hay jugadores registrados.</div>
 }
 else
 {
+    @*labels*@
+    <div class="row">
+        @*Filtrar por*@
+        <div class="col-3">
+            <label class="col-form-label"><strong>Filtrar por</strong></label>
+        </div>
+
+        @*ValorFiltro*@
+        <div class="col-4">
+            <label class="col-form-label"><strong>B&Uacute;squeda</strong></label>
+        </div>
+    </div>
+
+    @*Inputs y botones*@
+    <div class="row align-items-center">
+        @*filtro*@
+        <div class="col-3">
+            <InputSelect class="form-select" @bind-Value="Filtro">
+                <option value="" selected disabled>Elija una opcion</option>
+                <option value="Jugador">Jugador</option>
+                <option value="Partidas">Partidas</option>
+            </InputSelect>
+        </div>
+
+        @*Busqueda*@
+        <div class="col-4">
+            <div class="input-group">
+                <input class="form-control" @bind="ValorFiltro" placeholder="Buscar"/>
+                <button type="button" class="btn btn-outline-primary" @onclick="Buscar">
+                    <i class="fa fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+    </div>
+
     <table class="table table-striped table-bordered shadow-sm">
         <thead class="table-dark">
             <tr>
@@ -31,7 +69,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var jugador in listaJugadores)
+            @foreach (var jugador in ListaJugadores)
             {
                 <tr>
                     <td>@jugador.JugadorId</td>
@@ -60,21 +98,40 @@ else
 </div>
 
 @code {
+    public List<Jugadores>? ListaJugadores { get; set; } = new List<Jugadores>();
 
-    private List<Jugadores>? listaJugadores;
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            listaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+            ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
         }catch(Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
 
     }
-
+    private async Task Buscar()
+    {
+        if(ValorFiltro.Trim().ToLower()!="")
+        {
+            if(Filtro == "Jugador")
+            {
+                ListaJugadores = await jugadoresService.Listar(j => j.JugadorName.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+            else if(Filtro == "Partidas")
+            {
+                ListaJugadores = await jugadoresService.Listar(j => j.partida.ToString().Contains(ValorFiltro.ToLower()));
+            }
+        }
+        else
+        {
+            ListaJugadores = await jugadoresService.Listar(e => e.JugadorId > 0);
+        }
+    }
     private void Editar(int id)
     {
         navigationManager.NavigateTo($"/Jugador/Edit/{id}");
@@ -87,7 +144,7 @@ else
             var eliminado = await jugadoresService.Eliminar(id);
             if (eliminado)
             {
-                listaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+                ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
                 //StateHasChanged();
             }
         }catch(Exception ex)
@@ -96,4 +153,3 @@ else
         }
     }
 }
-    
