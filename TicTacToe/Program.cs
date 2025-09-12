@@ -27,6 +27,7 @@ namespace TicTacToe
             builder.Services.AddScoped<Contexto>();
             builder.Services.AddScoped<JugadoresService>();
 
+            builder.Services.AddScoped<PartidasService>();
 
             var app = builder.Build();
             
