@@ -59,7 +59,6 @@
 
     public Jugadores Jugador { get; set; } = new Jugadores();
     public string Mensaje { get; set; } = string.Empty;
-    public List<Jugadores> ListaJugadores { get; set; } = new List<Jugadores>();
 
     // protected override async Task OnInitializedAsync()
     // {
@@ -74,7 +73,6 @@
         {
             ShowAlert = true;
             Jugador = new Jugadores();
-            //navigationManager.NavigateTo("/Jugador/Index");
 
         }
         else

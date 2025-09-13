@@ -1,5 +1,143 @@
-﻿<h3>PartidasEdit</h3>
+﻿@page "/Partidas/Edit/{id:int}"
+
+@using Microsoft.AspNetCore.Components.Forms
+@using TicTacToe.Models
+@inject TicTacToe.Services.PartidasService partidasService
+@inject TicTacToe.Services.JugadoresService jugadoresService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+@* MainLayout.razor *@
+<link href="app.css" rel="stylesheet" />
+
+<PageTitle>Editar Partida</PageTitle>
+
+<EditForm Model="Partida" OnValidSubmit="Modificar" FormName="EditarPartidaForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Editar Partida</h5>
+            </div>
+
+            <div class="card-body">
+                @*PartidaId*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>PartidaId</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Partida.PartidaId" readonly />
+                </div>
+
+                @*Jugador1*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Jugador 1</strong></label>
+                    <InputSelect class="form-control" @bind-Value="Partida.Jugador1Id">
+                        <option value="">-- Seleccione un jugador --</option>
+                        @foreach (var jugador in ListaJugadores)
+                        {
+                            <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Partida.Jugador1Id" />
+                </div>
+
+                @*Jugador2*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Jugador 2</strong></label>
+                    <InputSelect class="form-control" @bind-Value="Partida.Jugador2Id">
+                        <option value="">-- Seleccione un jugador --</option>
+                        @foreach (var jugador in ListaJugadores)
+                        {
+                            <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Partida.Jugador2Id" />
+                </div>
+
+                @*Estado Partida*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Estado Partida</strong></label>
+                    <InputSelect class="form-control" @bind-Value="Partida.EstadoPartida">
+                        <option value="">-- Seleccione un estado --</option>
+                        <option value="En Espera">En Espera</option>
+                        <option value="En Progreso">En Progreso</option>
+                        <option value="Finalizada">Finalizada</option>
+                        <option value="Empate">Empate</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => Partida.EstadoPartida" />
+                </div>
+
+                @*Estado Tablero*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Estado Tablero</strong></label>
+                    <InputText class="form-control" @bind-Value="Partida.EstadoTablero" />
+                    <ValidationMessage For="() => Partida.EstadoTablero" />
+                </div>
+
+                @*Ganador*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Ganador</strong></label>
+                    <InputSelect class="form-control" @bind-Value="Partida.GanadorId">
+                        <option value="">-- Seleccione un jugador --</option>
+                        @foreach (var jugador in ListaJugadores)
+                        {
+                            <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                @*Turno Jugador*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Turno Jugador</strong></label>
+                    <InputSelect class="form-control" @bind-Value="Partida.TurnoJugadorId">
+                        <option value="">-- Seleccione un jugador --</option>
+                        @foreach (var jugador in ListaJugadores)
+                        {
+                            <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                @*Fecha Fin*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha Fin</strong></label>
+                    <InputDate class="form-control" @bind-Value="Partida.FechaFin"></InputDate>
+                </div>
+            </div>
+
+            @*Footer*@ 
+            <div class="card-footer text-center mt-2">
+                <a href="/Partidas/Index" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <span class="bi bi-floppy"></span> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
 
 @code {
+    [Parameter]
+    public int id { get; set; }
 
+    public Partidas Partida { get; set; } = new Partidas();
+    public List<Jugadores> ListaJugadores { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Partida = await partidasService.Buscar(id);
+
+        ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+    }
+
+    private async Task Modificar()
+    {
+        var guardado = await partidasService.Modificar(Partida);
+
+        if (guardado)
+            navigationManager.NavigateTo("/Partidas/Index");
+    }
 }

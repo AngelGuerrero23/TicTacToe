@@ -9,18 +9,14 @@ namespace TicTacToe.Services
     {
         public async Task<bool> Guardar(Partidas partida)
         {
-            if (!await Existe(partida.PartidaId) && partida.Jugador1Id != partida.Jugador2Id)
-            {
-                return await Insertar(partida);
-            } 
-            else if (await Existe(partida.PartidaId))
-            {
-                return await Modificar(partida);
-            }
-            else
+            if (!await JugadorExiste(partida.Jugador1Id))
             {
                 return false;
             }
+
+            if (!await Existe(partida.PartidaId) && partida.Jugador1Id != partida.Jugador2Id) return await Insertar(partida);
+            else if (await Existe(partida.PartidaId)) return await Modificar(partida);
+            else return false;
 
         }
 
@@ -58,12 +54,24 @@ namespace TicTacToe.Services
         public async Task<List<Partidas>> Listar(Expression<Func<Partidas, bool>>expression)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
-            return await contexto.Partidas.Where(expression).AsNoTracking().ToListAsync();
+            return await contexto.Partidas
+                .Where(expression)
+                .Include(Partida => Partida.Jugador1)
+                .Include(Partida => Partida.Jugador2)
+                .Include(Partida => Partida.Ganador)
+                .AsNoTracking()
+                .ToListAsync();
         }
         private async Task<bool> Existe(int partidaId)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
             return await contexto.Partidas.AnyAsync(p=>p.PartidaId == partidaId);
+        }
+
+        private async Task<bool> JugadorExiste(int jugadorId)
+        {
+            await using var contexto = await DbFactory.CreateDbContextAsync();
+            return await contexto.Jugadores.AnyAsync(j => j.JugadorId == jugadorId);
         }
 
     }

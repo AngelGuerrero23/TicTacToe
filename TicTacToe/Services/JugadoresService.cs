@@ -15,18 +15,9 @@ namespace TicTacToe.Services
             {
                 jugador.partida = 0;
             }
-            if (!await Existe(jugador.JugadorId) && !await ExisteNombre(jugador.JugadorName.ToLower()))
-            {
-                return await Insertar(jugador);
-            }
-            else if (await Existe(jugador.JugadorId) && !await ExisteNombre(jugador.JugadorName.ToLower(), jugador.JugadorId))
-            {
-                return await Modificar(jugador);
-            }
-            else
-            {
-                return false;
-            }
+            if (!await Existe(jugador.JugadorId) && !await ExisteNombre(jugador.JugadorName.ToLower())) return await Insertar(jugador);
+            else if (await Existe(jugador.JugadorId) && !await ExisteNombre(jugador.JugadorName.ToLower(), jugador.JugadorId)) return await Modificar(jugador);
+            else return false;
 
         }
 

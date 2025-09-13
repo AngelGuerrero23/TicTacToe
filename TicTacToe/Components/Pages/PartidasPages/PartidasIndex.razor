@@ -11,86 +11,92 @@
 
 
 <PageTitle>Partidas</PageTitle>
-<h3 class="mb-">Listado de Partidas</h3>
+<h3 class="mb-3">Listado de Partidas</h3>
 
-@*Labels*@
-<div class="row">
-    @*Filtrar por*@
+@*Filtros*@
+<div class="row mb-3">
     <div class="col-3">
         <label class="col-form-label"><strong>Filtrar por</strong></label>
     </div>
-
-    @*ValorFiltro*@
     <div class="col-4">
-        <label class="col-form-label"><strong>Busqueda</strong></label>
+        <label class="col-form-label"><strong>Búsqueda</strong></label>
     </div>
 </div>
 
-@*Inputs y botones*@
-<div class="row align-items-center">
-    @*Filtro*@
+<div class="row align-items-center mb-3">
+    @*Selector de filtro*@
     <div class="col-3">
         <InputSelect class="form-select" @bind-Value="Filtro">
-            <option value="" selected disabled>Elija una opcion</option>
-            <option value="PartidaId">JugadorId</option>
-            <option value="Fecha Inicio">Fecha Inicio</option>
-            <option value="Fecha Fin">Fecha Fin</option>
-            <option value="Estado">Estado</option>
-            <option value="Ganador">Ganador</option>
+            <option value="" selected disabled>Elija una opción</option>
+            <option value="PartidaId">Partida Id</option>
+            <option value="Jugador1Id">Jugador 1</option>
+            <option value="Jugador2Id">Jugador 2</option>
+            <option value="EstadoPartida">Estado Partida</option>
+            <option value="GanadorId">Ganador</option>
+            <option value="FechaInicio">Fecha Inicio</option>
+            <option value="FechaFin">Fecha Fin</option>
         </InputSelect>
     </div>
 
-    @*Busqueda*@
+    @*Búsqueda*@
     <div class="col-4">
         <div class="input-group">
-            <input class="form-control" @bind="ValorFiltro" placeholder="Buscar"/>
+            <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
             <button type="button" class="btn btn-outline-primary" @onclick="Buscar">
-                <i class="fade fa-search"></i>Buscar
+                <i class="bi bi-search"></i> Buscar
             </button>
         </div>
     </div>
 </div>
+
+@*Table*@
 <table class="table table-striped table-bordered shadow-sm">
     <thead class="table-dark">
         <tr>
             <th>PartidaId</th>
-            <th>Jugador1Id</th>
-            <th>Jugador2Id</th>
-            <th>Estado Partida</th>
+            <th>Jugador1</th>
+            <th>Jugador2</th>
+            <th>EstadoPartida</th>
+            <th>EstadoTablero</th>
             <th>Ganador</th>
-            <th>Fecha Inicio</th>
-            <th>Fecha Fin</th>
+            <th>FechaInicio</th>
+            <th>FechaFin</th>
+            <th>Acciones</th>
         </tr>
     </thead>
+    <tbody>
+        @foreach (var partida in ListaPartidas)
+        {
+            <tr>
+                <td>@partida.PartidaId</td>
+                <td>@partida.Jugador1.JugadorName</td>
+                <td>@partida.Jugador2.JugadorName</td>
+                <td>@partida.EstadoPartida</td>
+                <td>@partida.EstadoTablero</td>
+                <td>@partida.GanadorId</td>
+                <td>@partida.FechaInicio</td>
+                <td>@partida.FechaFin</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-2"
+                            @onclick="() => Editar(partida.PartidaId)">
+                        Editar
+                    </button>
+                    <button class="btn btn-sm btn-danger"
+                            @onclick="() => Eliminar(partida.PartidaId)">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
-<tbody>
-    @foreach(var partida in ListaPartidas)
-    {
-        <tr>
-            <td>@partida.PartidaId</td>
-            <td>@partida.Jugador1Id</td>
-            <td>@partida.Jugador2Id</td>
-            <td>@partida.EstadoPartida</td>
-            <td>@partida.EstadoTablero</td>
-            <td>@partida.GanadorId</td>
-            <td>@partida.FechaInicio</td>
-            <td>@partida.FechaFin</td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary me-2"
-                @onclick="()=> Editar(partida.PartidaId)">Editar
-            </button>
-            <button class="btn btn-sm btn-danger"
-                    @onclick="()=>Eliminar(partida.PartidaId)">Eliminar
-                </button>
-            </td>
-        </tr>
-}<div class="mt-3">
-    <a href="/Partidas/Create" class="btn btn-sucess">
-        <span class="bi bi-plus-circle"></span>Crear Nueva Partida
+
+<div class="mt-3">
+    <a href="/Partidas/Create" class="btn btn-success">
+        <span class="bi bi-plus-circle"></span> Crear Nueva Partida
     </a>
 </div>
 
-</tbody>
 @code {
     public List<Partidas>? ListaPartidas { get; set; } = new List<Partidas>();
 
@@ -104,26 +110,34 @@
 
     private async Task Buscar()
     {
-        if (ValorFiltro.Trim().ToLower() != "")
-            if (Filtro == "PartidaId")
-                ListaPartidas = await partidasService.Listar(p => p.PartidaId.ToString().Contains(ValorFiltro.ToLower()));
-            else if (Filtro == "Jugador1Id")
-                ListaPartidas = await partidasService.Listar(p => p.Jugador1Id.ToString().Contains(ValorFiltro.ToLower()));
-            else if (Filtro == "Jugador2Id")
-                ListaPartidas = await partidasService.Listar(p => p.Jugador2Id.ToString().Contains(ValorFiltro.ToLower()));
-            else if (Filtro == "EstadoPartida")
-                ListaPartidas = await partidasService.Listar(p => p.EstadoPartida.Contains(ValorFiltro.ToLower()));
-            else if (Filtro == "GanadorId")
-                ListaPartidas = await partidasService.Listar(p => p.GanadorId.ToString().Contains(ValorFiltro.ToLower()));
-            else if (Filtro == "FechaInicio")
-                ListaPartidas = await partidasService.Listar(p => p.FechaInicio.ToString().Contains(ValorFiltro.ToLower()));
-            else if (Filtro == "FechaFin")
-                ListaPartidas = await partidasService.Listar(p => p.FechaFin.ToString().Contains(ValorFiltro.ToLower()));
-            else ListaPartidas = await partidasService.Listar(p => p.PartidaId > 0);
+        if (string.IsNullOrWhiteSpace(ValorFiltro))
+        {   ListaPartidas = await partidasService.Listar(p => p.PartidaId > 0);
+            return;
+        }
+
+        string filtroValor = ValorFiltro.ToLower();
+
+        if (Filtro == "PartidaId")
+            ListaPartidas = await partidasService.Listar(p => p.PartidaId.ToString().Contains(filtroValor));
+        else if (Filtro == "Jugador1Id")
+            ListaPartidas = await partidasService.Listar(p => p.Jugador1Id.ToString().Contains(filtroValor));
+        else if (Filtro == "Jugador2Id")
+            ListaPartidas = await partidasService.Listar(p => p.Jugador2Id.ToString().Contains(filtroValor));
+        else if (Filtro == "EstadoPartida")
+            ListaPartidas = await partidasService.Listar(p => p.EstadoPartida.ToLower().Contains(filtroValor));
+        else if (Filtro == "GanadorId")
+            ListaPartidas = await partidasService.Listar(p => p.GanadorId.ToString().Contains(filtroValor));
+        else if (Filtro == "FechaInicio")
+            ListaPartidas = await partidasService.Listar(p => p.FechaInicio.ToString().ToLower().Contains(filtroValor));
+        else if (Filtro == "FechaFin")
+            ListaPartidas = await partidasService.Listar(p => p.FechaFin.ToString()!.ToLower().Contains(filtroValor));
+        else
+            ListaPartidas = await partidasService.Listar(p => p.PartidaId > 0);
     }
+
     private void Editar(int id)
     {
-        navigationManager.NavigateTo($"/Partidas/Edit{id}");
+        navigationManager.NavigateTo($"/Partidas/Edit/{id}");
     }
 
     private async Task Eliminar(int id)
@@ -132,6 +146,4 @@
         if (eliminado)
             ListaPartidas = await partidasService.Listar(p => p.PartidaId > 0);
     }
-
-
 }
