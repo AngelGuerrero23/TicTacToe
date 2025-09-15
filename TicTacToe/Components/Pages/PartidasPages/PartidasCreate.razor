@@ -82,7 +82,10 @@
                         <option value="">-- Seleccione un jugador --</option>
                         @foreach (var jugador in ListaJugadores)
                         {
-                            <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                            @if(jugador.JugadorId == Partida.Jugador1Id || jugador.JugadorId == Partida.Jugador2Id)
+                            {
+                                <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                            }  
                         }
                     </InputSelect>
                     <ValidationMessage For="() => Partida.TurnoJugadorId" />
@@ -142,8 +145,8 @@
         }
         else
         {
-            ShowAlert = false;
-            Mensaje = "No se pudo guardar";
+            ShowAlert = true;
+            Mensaje = "Los campos deben estar completamente llenos";
         }
     }
 
