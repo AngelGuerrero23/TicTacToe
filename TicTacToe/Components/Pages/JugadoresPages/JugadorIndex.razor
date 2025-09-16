@@ -74,7 +74,7 @@ else
                 <tr>
                     <td>@jugador.JugadorId</td>
                     <td>@jugador.JugadorName</td>
-                    <td>@jugador.partida</td>
+                    <td>@jugador.Victorias</td>
                     <td>
                         <button class="btn btn-sm btn-primary me-2"
                                 @onclick="() => Editar(jugador.JugadorId)">
@@ -124,7 +124,7 @@ else
             }
             else if(Filtro == "Partidas")
             {
-                ListaJugadores = await jugadoresService.Listar(j => j.partida.ToString().Contains(ValorFiltro.ToLower()));
+                ListaJugadores = await jugadoresService.Listar(j => j.Victorias.ToString().Contains(ValorFiltro.ToLower()));
             }
         }
         else

@@ -11,9 +11,9 @@ namespace TicTacToe.Services
 
         public async Task<bool> Guardar(Jugadores jugador)
         {
-            if (jugador.partida <= 0)
+            if (jugador.Victorias <= 0)
             {
-                jugador.partida = 0;
+                jugador.Victorias = 0;
             }
             if (!await Existe(jugador.JugadorId) && !await ExisteNombre(jugador.JugadorName.ToLower())) return await Insertar(jugador);
             else if (await Existe(jugador.JugadorId) && !await ExisteNombre(jugador.JugadorName.ToLower(), jugador.JugadorId)) return await Modificar(jugador);
@@ -30,9 +30,9 @@ namespace TicTacToe.Services
 
         public async Task<bool> Modificar(Jugadores jugador)
         {
-            if (jugador.partida <= 0)
+            if (jugador.Victorias <= 0)
             {
-                jugador.partida = 0;
+                jugador.Victorias = 0;
             }
             await using var contexto = await DbFactory.CreateDbContextAsync();
             contexto.Update(jugador);

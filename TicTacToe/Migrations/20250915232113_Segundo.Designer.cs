@@ -12,8 +12,8 @@ using TicTacToe.DAL;
 namespace TicTacToe.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20250912142232_TablaPartida")]
-    partial class TablaPartida
+    [Migration("20250915232113_Segundo")]
+    partial class Segundo
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
