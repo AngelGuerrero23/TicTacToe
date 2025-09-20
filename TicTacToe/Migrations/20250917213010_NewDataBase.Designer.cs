@@ -12,8 +12,8 @@ using TicTacToe.DAL;
 namespace TicTacToe.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20250915232113_Segundo")]
-    partial class Segundo
+    [Migration("20250917213010_NewDataBase")]
+    partial class NewDataBase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,12 @@ namespace TicTacToe.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JugadorId"));
+
+                    b.Property<int>("Derrotas")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Empates")
+                        .HasColumnType("int");
 
                     b.Property<string>("JugadorName")
                         .IsRequired()

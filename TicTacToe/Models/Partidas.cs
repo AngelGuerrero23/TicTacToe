@@ -12,13 +12,15 @@ namespace TicTacToe.Models
 
         [Required]
         [StringLength(20)]
-        public string EstadoPartida { get; set; } = "------";
+        public string EstadoPartida { get; set; }
         
         public int? GanadorId { get; set; }
+
+        [Required]
         public int TurnoJugadorId { get; set; }
 
         [StringLength(9)]
-        public string EstadoTablero { get; set; } = "--------";
+        public string EstadoTablero { get; set; }
 
         public DateTime FechaInicio { get; set; } = DateTime.UtcNow;
         public DateTime? FechaFin {  get; set; }

@@ -66,7 +66,7 @@
                 <div class="mb-3">
                     <label class="form-label"><strong>Estado Partida</strong></label>
                     <InputSelect class="form-control" @bind-Value="Partida.EstadoPartida">
-                        <option value="" disabled>Elija una opción</option>
+                        <option value="" >Elija una opción</option>
                         <option value="En Espera">En Espera</option>
                         <option value="En Progreso">En Progreso</option>
                         <option value="Finalizada">Finalizada</option>
@@ -79,7 +79,7 @@
                 <div class="mb-3">
                     <label class="form-label"><strong>Turno Jugador</strong></label>
                     <InputSelect class="form-control" @bind-Value="Partida.TurnoJugadorId">
-                        <option value="">-- Seleccione un jugador --</option>
+                        <option value=""disabled>-- Seleccione un jugador --</option>
                         @foreach (var jugador in ListaJugadores)
                         {
                             @if(jugador.JugadorId == Partida.Jugador1Id || jugador.JugadorId == Partida.Jugador2Id)
@@ -122,7 +122,7 @@
     protected override async Task OnInitializedAsync()
     {
         ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
-        Partida.EstadoTablero = "---------";
+        Partida.EstadoTablero = " ";
     }
 
     public async Task Guardar()
@@ -136,6 +136,12 @@
         }
         var creado = await partidasService.Guardar(Partida);
 
+        if(Partida.EstadoPartida == null || Partida.EstadoTablero == null)
+        {
+            Mensaje = "Debe completar el estado de la partida";
+            ShowAlert = false;
+            return;
+        }
         if (creado)
         {
             Mensaje = "¡Partida agregada exitosamente!";

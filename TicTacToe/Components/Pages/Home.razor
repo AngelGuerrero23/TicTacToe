@@ -1,34 +1,108 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@using TicTacToe.Models;
+@using TicTacToe.Services;
+@inject JugadoresService jugadoresService;
+@inject PartidasService partidasService;
+<PageTitle>TicTacToe</PageTitle>
 
-@inject JugadoresService jugadoresService
-@inject NavigationManager navigationManager
+<div class="container mx-auto max-w-lg p-6 bg-white rounded-lg shadow-xl text-center">
 
+    <div class="game-container">
+        @if (!gameStarted)
+        {
+            <!-- PANTALLA DE SELECCIÓN DE JUGADOR -->
+            <div class="selection-screen">
+                <h1>Elige tu jugador</h1>
+                <div class="d-flex gap-4">
+                 <div class="d-flex flex-column">
+                    <label class="form-label"><strong>Jugador X</strong></label>
+                    <InputSelect class="form-control" @bind-Value="jugador1Id">
+                        <option value="">Seleccione un jugador</option>
+                        @foreach(var jugador in jugadores)
+                            {
+                                <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                            }
+                            
+                        }
+                    </InputSelect>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <label class="form-label"><strong>Jugador 0</strong></label>
+                        <InputSelect class="form-control" @bind-Value="jugador2Id">
+                            <option value="">Seleccione un jugador</option>
+                            @foreach(var jugador in jugadores)
+                            {
+                                <option value="@jugador.JugadorId" disabled="@(jugador.JugadorId==jugador1Id)">@jugador.JugadorName</option> 
 
-<PageTitle>Gestion de Jugadores</PageTitle>
-
-<h1>Gestion de Jugadores</h1>
-
-Welcome to your new app Gestion de Jugadores.
-<br />
-
-@*@<PageTitle>Registro de Jugadores</PageTitle>
-<div class="container">
-    <div class="card shadow-lg">
-        <div class="card-header space-between">
-            <h5 class="card-title">Registro de Jugadores</h5>
-            <a href="/Jugador/Create" class="btn btn-primary"><span class="bi bi-plus-square mt-3">
-            </span> Crear</a>
-        </div>
-        <div class="card-body">
-            @*labels*
-            <div class="row">
-            @*Inputs y botones*
-            <div class="row align-items-center">
+                            }
+                    </InputSelect>
+                    </div>
+                </div>
+                <button class="btn btn-success btn-lg mt-4"
+                        disabled="@(jugador1Id == null || jugador2Id==null || jugador1Id == jugador2Id)"
+                        @onclick="StartGame">
+                    Iniciar Partida
+                </button>
+            </div>
             
-            <table class="table table-hover">
-            </table>
-            </div>
-            </div>
-        </div>
+        }
+        else
+        {
+
+        }
     </div>
-</div> *@
+</div>
+
+
+
+@code {
+
+    private bool gameStarted;
+    private List<Jugadores> jugadores = new List<Jugadores>();
+
+    private int? jugador1Id;
+
+    private int? jugador2Id;
+    private int? partidaIdCreada;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        jugadores = await jugadoresService.Listar(jugador1Id => true);
+    }
+
+
+    private async Task StartGame()
+    {
+        if (jugador1Id != null && jugador2Id != null && jugador1Id != jugador2Id)
+        {
+            var nuevaPartida = new Partidas
+            {
+                Jugador1Id = jugador1Id.Value,
+                Jugador2Id = jugador2Id.Value,
+                EstadoPartida = "En Espera",
+                FechaInicio = DateTime.Now,
+                TurnoJugadorId = jugador1Id.Value,
+                EstadoTablero = ""
+            };
+
+            var guardado = await partidasService.Guardar(nuevaPartida);
+
+            if(guardado)
+            {
+                gameStarted = true;
+                Navigation.NavigateTo($"/game/{jugador1Id}/{jugador2Id}");
+            }
+            
+            
+        }
+    }
+
+    private void RestartGame()
+    {
+        gameStarted = false;
+    }
+}

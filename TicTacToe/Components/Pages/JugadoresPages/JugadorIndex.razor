@@ -64,7 +64,9 @@ else
             <tr>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Partidas</th>
+                <th>Victorias</th>
+                <th>Derrotas</th>
+                <th>Empates</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -75,14 +77,14 @@ else
                     <td>@jugador.JugadorId</td>
                     <td>@jugador.JugadorName</td>
                     <td>@jugador.Victorias</td>
+                    <th>@jugador.Derrotas</th>
+                    <th>@jugador.Empates</th>
                     <td>
-                        <button class="btn btn-sm btn-primary me-2"
+                        <button class="bi bi-pencil-square btn-primary me-2"
                                 @onclick="() => Editar(jugador.JugadorId)">
-                            Editar
                         </button>
-                        <button class="btn btn-sm btn-danger"
+                        <button class="bi bi-trash btn-danger"
                                 @onclick="() => Eliminar(jugador.JugadorId)">
-                            Eliminar
                         </button>
                     </td>
                 </tr>

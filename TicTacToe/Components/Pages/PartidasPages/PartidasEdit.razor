@@ -82,7 +82,10 @@
                         <option value="">-- Seleccione un jugador --</option>
                         @foreach (var jugador in ListaJugadores)
                         {
-                            <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                            @if (jugador.JugadorId == Partida.Jugador1Id || jugador.JugadorId == Partida.Jugador2Id)
+                            {
+                                <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                            }
                         }
                     </InputSelect>
                 </div>
@@ -94,7 +97,10 @@
                         <option value="">-- Seleccione un jugador --</option>
                         @foreach (var jugador in ListaJugadores)
                         {
-                            <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                            @if (jugador.JugadorId == Partida.Jugador1Id || jugador.JugadorId == Partida.Jugador2Id)
+                            {
+                                <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                            }
                         }
                     </InputSelect>
                 </div>
@@ -102,7 +108,7 @@
                 @*Fecha Fin*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Fecha Fin</strong></label>
-                    <InputDate class="form-control" @bind-Value="Partida.FechaFin"></InputDate>
+                    <input class="form-control" value="@Partida.FechaInicio.ToLocalTime().ToString("yyyy-MM-dd HH:mm")" readonly />
                 </div>
             </div>
 

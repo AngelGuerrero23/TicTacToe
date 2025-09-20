@@ -11,6 +11,8 @@ namespace TicTacToe.DAL
 
         public DbSet<Partidas> Partidas { get; set; }
 
+        public DbSet<Movimientos> Movimientos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Partidas>(entity =>
@@ -35,7 +37,21 @@ namespace TicTacToe.DAL
                 .HasForeignKey(p => p.TurnoJugadorId)
                 .OnDelete(DeleteBehavior.NoAction);
             });
-            
+
+            modelBuilder.Entity<Movimientos>(entity =>
+            {
+                entity.HasOne(m => m.Jugador)
+                      .WithMany(j => j.Movimientos)
+                      .HasForeignKey(m => m.JugadorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(m => m.Partida)
+                      .WithMany()
+                      .HasForeignKey(m => m.PartidaId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

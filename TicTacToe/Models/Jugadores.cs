@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TicTacToe.Models
 {
@@ -20,6 +21,7 @@ namespace TicTacToe.Models
         public int Derrotas { get; set; }
         public int Empates { get; set; }
 
-       
+        [InverseProperty(nameof(Models.Movimientos.Jugador))]
+        public virtual ICollection<Movimientos> Movimientos { get; set; } = new List<Movimientos>();
     }   
 }

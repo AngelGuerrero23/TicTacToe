@@ -73,18 +73,16 @@
                 <td>@partida.Jugador2.JugadorName</td>
                 <td>@partida.EstadoPartida</td>
                 <td>@partida.EstadoTablero</td>
-                <td>@partida.GanadorId</td>
-                <td>@partida.FechaInicio</td>
-                <td>@partida.FechaFin</td>
+                <td>@(partida.Ganador != null ? partida.Ganador.JugadorName : "Sin ganador")</td>
+                <td>@partida.FechaInicio.ToLocalTime().ToString("yyyy-MM-dd hh:mm")</td>
+                <td>@(partida.FechaFin.HasValue? partida.FechaFin.Value.ToLocalTime().ToString("yyyy-MM-dd hh:mm"):"")</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary me-2"
-                            @onclick="() => Editar(partida.PartidaId)">
-                        Editar
-                    </button>
-                    <button class="btn btn-sm btn-danger"
-                            @onclick="() => Eliminar(partida.PartidaId)">
-                        Eliminar
-                    </button>
+                    <button class="bi bi-pencil-square btn-primary me-2"
+                                @onclick="() => Editar(partida.PartidaId)">
+                        </button>
+                        <button class="bi bi-trash btn-danger"
+                                @onclick="() => Eliminar(partida.PartidaId)">
+                        </button>
                 </td>
             </tr>
         }

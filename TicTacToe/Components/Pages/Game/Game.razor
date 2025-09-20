@@ -1,0 +1,131 @@
+﻿@page "/game/{jugador1Id:int}/{jugador2Id:int}"
+@using TicTacToe.DAL
+@inject JugadoresService jugadoresService
+@rendermode InteractiveServer
+
+<!-- PANTALLA DE JUEGO -->
+
+<div class="container mx-auto max-w-lg p-6 bg-white rounded-lg shadow-xl text-center">
+    <div class="game-container">
+        <div class="game-screen">
+            <h2 class="game-status">@GameStatus</h2>
+
+            <div class="game-board">
+                @for (var i = 0; i < 9; i++)
+                {
+                    var cellIndex = i; // Copia local para evitar problemas con el closure en el lambda
+                                       <button class="cell @GetPlayerClass(board[cellIndex])"
+                                               @onclick="() => HandleCellClick(cellIndex)"
+                                               disabled="@(board[cellIndex] != null || winner != null || esEmpate)">
+                                           @GetSymbol(board[cellIndex])
+                                       </button>
+                }
+            </div>
+
+            <button class="btn btn-secondary mt-4" @onclick="RestartGame">
+                Reiniciar Juego
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int jugador1Id { get; set; }
+    [Parameter] public int jugador2Id { get; set; }
+
+    private Jugadores? jugadorX;
+    private Jugadores? jugadorO;
+
+    protected override async Task OnInitializedAsync()
+    {
+        jugadorX = await jugadoresService.Buscar(jugador1Id);
+        jugadorO = await jugadoresService.Buscar(jugador2Id);
+        _currentPlayerType = jugadorX;
+    }
+
+    private Jugadores?[] board = new Jugadores?[9];
+    private Jugadores? _currentPlayerType;
+    private Jugadores? winner;
+    private bool esEmpate;
+
+    private string GameStatus
+    {
+        get
+        {
+            if (winner != null)
+            return $"🏆 ¡Ganador: {winner.JugadorName}!";
+            return esEmpate
+                ? "🤝 ¡Es un empate!"
+                : $"Turno de: {(_currentPlayerType == jugadorX ? jugadorX?.JugadorName: jugadorO?.JugadorName)}";
+        }
+    }
+
+    private void HandleCellClick(int index)
+    {
+        // Ignorar si la celda está ocupada o el juego terminó
+        if (board[index] == null && winner == null)
+        {
+            board[index] = _currentPlayerType; // "X" o "O"
+            CheckForWinner();
+        }
+
+        board[index] = _currentPlayerType;
+
+        winner = CheckForWinner();
+        if (winner != null)
+        {
+            return; // El juego termina
+        }
+
+        // Comprobar empate
+        esEmpate = board.All(cell => cell != null);
+        if (esEmpate)
+        {
+            return; // El juego termina
+        }
+
+        // Cambiar turno
+        _currentPlayerType = (_currentPlayerType == jugadorX) ? jugadorO : jugadorX;
+    }
+
+    private Jugadores? CheckForWinner()
+    {
+        var winningLines = new[]
+        {
+             new[] {0, 1, 2}, new[] {3, 4, 5}, new[] {6, 7, 8},// Horizontales
+             new[] {0, 3, 6}, new[] {1, 4, 7}, new[] {2, 5, 8},// Verticales
+             new[] {0, 4, 8}, new[] {2, 4, 6}// Diagonales
+        };
+
+        foreach (var line in winningLines)
+        {
+            var (a, b, c) = (line[0], line[1], line[2]);
+            if (board[a] != null && board[a] == board[b] && board[a] == board[c])
+            {
+                return board[a];
+            }
+        }
+
+        return null; // No hay ganador
+    }
+
+    private void RestartGame()
+    {
+        board = new Jugadores?[9];
+        _currentPlayerType = jugadorX;
+        winner = null;
+        esEmpate = false;
+    }
+
+    private string GetPlayerClass(Jugadores? jugador)
+    {
+        if (jugador==null) return "";
+        return jugador == jugadorX ? "player-x" : "player-o";
+    }
+
+    private string GetSymbol(Jugadores? jugador)
+    {
+        if (jugador == null) return "";
+        return jugador == jugadorX ? "X" : "O";
+    }
+}

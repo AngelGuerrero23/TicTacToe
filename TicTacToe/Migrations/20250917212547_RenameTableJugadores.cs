@@ -6,11 +6,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TicTacToe.Migrations
 {
     /// <inheritdoc />
-    public partial class TablaPartida : Migration
+    public partial class RenameTableJugadores : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Jugadores",
+                columns: table => new
+                {
+                    JugadorId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    JugadorName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Victorias = table.Column<int>(type: "int", nullable: false),
+                    Derrotas = table.Column<int>(type: "int", nullable: false),
+                    Empates = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Jugadores", x => x.JugadorId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Partidas",
                 columns: table => new
@@ -77,6 +93,9 @@ namespace TicTacToe.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Partidas");
+
+            migrationBuilder.DropTable(
+                name: "Jugadores");
         }
     }
 }
