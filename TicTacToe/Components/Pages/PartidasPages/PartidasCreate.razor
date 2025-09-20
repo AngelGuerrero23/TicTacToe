@@ -67,10 +67,10 @@
                     <label class="form-label"><strong>Estado Partida</strong></label>
                     <InputSelect class="form-control" @bind-Value="Partida.EstadoPartida">
                         <option value="" >Elija una opción</option>
-                        <option value="En Espera">En Espera</option>
-                        <option value="En Progreso">En Progreso</option>
-                        <option value="Finalizada">Finalizada</option>
-                        <option value="Empate">Empate</option>
+                        @foreach(var estado in EstadosPartida.Todos)
+                        {
+                            <option value="@estado">@estado</option>
+                        }
                     </InputSelect>
                     <ValidationMessage For="() => Partida.EstadoPartida" />
                 </div>

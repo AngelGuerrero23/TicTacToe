@@ -31,12 +31,24 @@
                         <InputText class="form-control" @bind-value="Jugador.JugadorName"></InputText>
                         <ValidationMessage For="(()=>Jugador.JugadorName)"/>
                     </div>
-                    @*Partidas*@
+                    @*Victorias*@
                 <div class="mb-3">
-                        <label class="form-label"><strong>Partidas</strong></label>
+                        <label class="form-label"><strong>Victorias</strong></label>
                         <InputNumber class="form-control" @bind-value="Jugador.Victorias"></InputNumber>
                         <ValidationMessage For="(()=>Jugador.Victorias)"></ValidationMessage>
                     </div>
+                    @*Derrotas*@
+                <div class="mb-3">
+                        <label class="form-label"><strong>Derrotas</strong></label>
+                        <InputNumber class="form-control" @bind-Value="Jugador.Derrotas"></InputNumber>
+                        <ValidationMessage For="(()=>Jugador.Derrotas)"></ValidationMessage>
+                    </div>
+                    @*Empates*@
+                <div class="mb-3">
+                        <label class="form-label"><strong>Empates</strong></label>
+                        <InputNumber class="form-control" @bind-Value="Jugador.Empates"></InputNumber>
+                        <ValidationMessage For="(()=>Jugador.Empates)"></ValidationMessage>
+                </div>
                @if(ShowAlert)
                 {
                         <div class="alert alert-primary" role="alert">

@@ -12,7 +12,7 @@ namespace TicTacToe.Models
 
         [Required]
         [StringLength(20)]
-        public string EstadoPartida { get; set; }
+        public string EstadoPartida { get; set; } = EstadosPartida.EnEspera;
         
         public int? GanadorId { get; set; }
 

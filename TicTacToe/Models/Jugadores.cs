@@ -17,8 +17,10 @@ namespace TicTacToe.Models
 
         [Range(0, int.MaxValue, ErrorMessage="Las partidas deben ser  0 o mayor")]
         public int Victorias { get; set; }
-
+        [Range(0, int.MaxValue, ErrorMessage = "Las partidas deben ser  0 o mayor")]
         public int Derrotas { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "Las partidas deben ser  0 o mayor")]
         public int Empates { get; set; }
 
         [InverseProperty(nameof(Models.Movimientos.Jugador))]
