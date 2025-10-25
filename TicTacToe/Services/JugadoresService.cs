@@ -25,7 +25,7 @@ namespace TicTacToe.Services
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
             contexto.Jugadores.Add(jugador);
-            return await contexto.SaveChangesAsync()>0;
+            return await contexto.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> Modificar(Jugadores jugador)
@@ -37,7 +37,7 @@ namespace TicTacToe.Services
             await using var contexto = await DbFactory.CreateDbContextAsync();
             contexto.Update(jugador);
             return await contexto
-                .SaveChangesAsync()>0;
+                .SaveChangesAsync() > 0;
         }
 
         public async Task<Jugadores?> Buscar(int jugadorId)
@@ -47,7 +47,7 @@ namespace TicTacToe.Services
                 .FirstOrDefaultAsync(o => o.JugadorId == jugadorId);
         }
 
-        public async Task<bool>Eliminar(int jugadorId)
+        public async Task<bool> Eliminar(int jugadorId)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
             return await contexto.Jugadores
@@ -73,7 +73,7 @@ namespace TicTacToe.Services
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
             return await contexto.Jugadores
-                .AnyAsync(j => j.JugadorName.ToLower()==jugadorName.ToLower());
+                .AnyAsync(j => j.JugadorName.ToLower() == jugadorName.ToLower());
         }
 
         private async Task<bool> ExisteNombre(string jugadorName, int jugadorId)
