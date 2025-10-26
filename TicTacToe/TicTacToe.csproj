@@ -15,4 +15,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TicTacToeLibrary.shared\TicTacToeApi.shared.csproj" />
+  </ItemGroup>
+
 </Project>
