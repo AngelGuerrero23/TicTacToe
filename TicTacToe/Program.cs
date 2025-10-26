@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TicTacToe.Components;
 using TicTacToe.DAL;
 using TicTacToe.Services;
+using TicTacToeApi.BlazorWasm.Services;
 
 namespace TicTacToe
 {
@@ -25,11 +26,9 @@ namespace TicTacToe
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://gestionhuacalesapi.azurewebsites.net/") });
 
             //Inyeccion del service
-            builder.Services.AddScoped<Contexto>();
-            builder.Services.AddScoped<JugadoresService>();
-
-            builder.Services.AddScoped<PartidasService>();
-            builder.Services.AddScoped<MovimientosService>();
+            builder.Services.AddScoped<IJugadoresApiService, JugadoresApiService>();
+            builder.Services.AddScoped<IPartidasApiService, PartidasApiService>();
+            builder.Services.AddScoped<IMovimientosApiService, MovimientosApiService>();
 
             var app = builder.Build();
             

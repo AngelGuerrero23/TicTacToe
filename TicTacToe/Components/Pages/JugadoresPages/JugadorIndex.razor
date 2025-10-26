@@ -1,5 +1,6 @@
-﻿@page "/Jugador/Index"
+﻿@page "/game"
 @using TicTacToe.Models
+@inject JugadoresApiService jugadoresApiService
 @inject JugadoresService jugadoresService
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
@@ -107,19 +108,21 @@
 </div>
 
 @code {
-    public List<Jugadores>? ListaJugadores { get; set; } = new List<Jugadores>();
+
+    public List<JugadorResponse>? ListaJugadores { get; set; } = new List<JugadorResponse>();
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        await LoadJugador();
+    }
+    public async Task LoadJugador()
+    {
+        var response = await jugadoresApiService.GetJugadoresAsync();
+        if (response is Resource<List<JugadorResponse>>.Success success)
         {
-            ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
+            ListaJugadores = success.Data?.ToList();
         }
     }
     private async Task Buscar()
@@ -128,16 +131,16 @@
         {
             if (Filtro == "Jugador")
             {
-                ListaJugadores = await jugadoresService.Listar(j => j.JugadorName.ToLower().Contains(ValorFiltro.ToLower()));
+                ListaJugadores = ListaJugadores?.Where(j => j.JugadorName.ToLower().Contains(ValorFiltro.ToLower())).ToList();
             }
             else if (Filtro == "Partidas")
             {
-                ListaJugadores = await jugadoresService.Listar(j => j.Victorias.ToString().Contains(ValorFiltro.ToLower()));
+                ListaJugadores = ListaJugadores?.Where(j => j.Email.ToLower().Contains(ValorFiltro.ToLower())).ToList();
             }
         }
         else
         {
-            ListaJugadores = await jugadoresService.Listar(e => e.JugadorId > 0);
+            await LoadJugador();
         }
     }
     private void Editar(int id)
@@ -152,7 +155,7 @@
             var eliminado = await jugadoresService.Eliminar(id);
             if (eliminado)
             {
-                ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
+                ListaJugadores = ListaJugadores?.Where(j => j.JugadorId != id).ToList();
             }
         }
         catch (Exception ex)
