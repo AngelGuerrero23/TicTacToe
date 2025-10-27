@@ -1,7 +1,8 @@
-﻿using TicTacToeApi.shared;
+﻿using System.Net.Http.Json;
+using TicTacToeApi.shared;
 using TicTacToeApi.shared.DTO;
 
-namespace TicTacToe.Services;
+namespace TicTacToe.Wasm.Service;
 
 public class JugadoresApiService(HttpClient httpClient) : IJugadoresApiService
 {
@@ -49,5 +50,13 @@ public class JugadoresApiService(HttpClient httpClient) : IJugadoresApiService
         {
             return new Resource<JugadorResponse>.Error("Respueta inválida del servidor.");
         }
+    }
+
+    public async Task<Resource<JugadorResponse>> UpdateJugadorAsync(int id, JugadorRequest request)
+    {
+        var response = await httpClient.PutAsJsonAsync($"api/Jugadores/{id}", request);
+        response.EnsureSuccessStatusCode();
+        var updated = await response.Content.ReadFromJsonAsync<JugadorResponse>();
+        return new Resource<JugadorResponse>.Success(updated!);
     }
 }

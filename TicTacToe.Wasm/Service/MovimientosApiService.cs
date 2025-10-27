@@ -1,7 +1,8 @@
-﻿using TicTacToeApi.shared;
+﻿using System.Net.Http.Json;
+using TicTacToeApi.shared;
 using TicTacToeApi.shared.DTO;
 
-namespace TicTacToe.Services;
+namespace TicTacToe.Wasm.Service;
 
 public class MovimientosApiService(HttpClient httpClient) : IMovimientosApiService
 {

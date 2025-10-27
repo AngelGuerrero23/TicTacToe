@@ -1,0 +1,190 @@
+﻿@page "/game/{jugador1Id:int}/{jugador2Id:int}"
+@inject TicTacToe.Wasm.Service.IJugadoresApiService jugadoresApiService
+@inject TicTacToe.Wasm.Service.IPartidasApiService partidasApiService
+@inject TicTacToe.Wasm.Service.IMovimientosApiService movimientosApiService
+
+<!-- PANTALLA DE JUEGO -->
+
+<div class="container mx-auto max-w-lg p-6 bg-white rounded-lg shadow-xl text-center">
+    <div class="game-container">
+        <h2 class="game-status">@GameStatus</h2>
+        <div class="game-screen">
+            <div class="game-board">
+                @for (var i = 0; i < 9; i++)
+                {
+                    var cellIndex = i; // Copia local para evitar problemas con el closure en el lambda
+                                       <button class="cell @GetPlayerClass(board[cellIndex])"
+                                               @onclick="() => HandleCellClick(cellIndex)"
+                                               disabled="@(board[cellIndex] != null || winner != null || esEmpate)">
+                                           @GetSymbol(board[cellIndex])
+                                       </button>
+                }
+            </div>
+            <button class="btn btn-secondary mt-4" @onclick="RestartGame">
+                Reiniciar Juego
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int jugador1Id { get; set; }
+    [Parameter] public int jugador2Id { get; set; }
+
+    private JugadorResponse? jugadorX;
+    private JugadorResponse? jugadorO;
+    private JugadorResponse?[] board = new JugadorResponse?[9];
+    private JugadorResponse? _currentPlayerType;
+    private JugadorResponse? winner;
+    private bool esEmpate;
+    // Local partida state (simple)
+    private class PartidaLocal
+    {
+        public int PartidaId { get; set; }
+        public int Jugador1Id { get; set; }
+        public int Jugador2Id { get; set; }
+        public string EstadoTablero { get; set; } = "---------";
+        public int TurnoJugadorId { get; set; }
+        public int? GanadorId { get; set; }
+        public DateTime FechaInicio { get; set; }
+        public DateTime? FechaFin { get; set; }
+    }
+
+    private PartidaLocal Partida = new PartidaLocal();
+
+    private string GameStatus
+    {
+        get
+        {
+            if (winner != null)
+                return $"🏆 ¡Ganador: {winner.JugadorName}!";
+            return esEmpate
+            ? "🤝 ¡Es un empate!"
+            : $"Turno de: {(_currentPlayerType?.JugadorName ?? string.Empty)}";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargar jugadores desde API
+        var r1 = await jugadoresApiService.GetJugadorAsync(jugador1Id);
+        if (r1 is Resource<JugadorResponse>.Success s1) jugadorX = s1.Data;
+
+        var r2 = await jugadoresApiService.GetJugadorAsync(jugador2Id);
+        if (r2 is Resource<JugadorResponse>.Success s2) jugadorO = s2.Data;
+
+        _currentPlayerType = jugadorX;
+    }
+
+    private async Task HandleCellClick(int index)
+    {
+        // Ignorar si la celda está ocupada o el juego terminó
+        if (board[index] != null || winner != null || esEmpate)
+            return;
+
+        // Colocar el jugador actual en la celda
+        board[index] = _currentPlayerType;
+
+        // Cambiar turno
+        _currentPlayerType = (_currentPlayerType?.JugadorId == jugadorX?.JugadorId) ? jugadorO : jugadorX;
+        Partida.TurnoJugadorId = _currentPlayerType?.JugadorId ?? 0;
+
+        StateHasChanged();
+
+        // Crear partida en el servidor si aún no existe
+        if (Partida.PartidaId == 0)
+        {
+            var create = await partidasApiService.PostPartida(jugadorX?.JugadorId ?? 0, jugadorO?.JugadorId ?? 0);
+            if (create is Resource<PartidaResponse>.Success p)
+            {
+                Partida.PartidaId = p.Data.PartidaId;
+                Partida.Jugador1Id = p.Data.Jugador1Id;
+                Partida.Jugador2Id = p.Data.Jugador2Id;
+                Partida.FechaInicio = DateTime.UtcNow;
+            }
+        }
+
+        int fila = index / 3;
+        int columna = index % 3;
+
+        // Registrar movimiento en la API (usar nombre o id según implementacion)
+        var jugadorNombre = board[index]?.JugadorName ?? string.Empty;
+        if (Partida.PartidaId != 0)
+        {
+            await movimientosApiService.PostMovimiento(Partida.PartidaId, jugadorNombre, fila, columna);
+        }
+
+        // Actualizar estado local del tablero
+        Partida.EstadoTablero = string.Join("", board.Select(c => c == null ? " " : (c.JugadorId == jugadorX?.JugadorId ? "X" : "O")));
+
+        // Verificar ganador
+        winner = CheckForWinner();
+        if (winner != null)
+        {
+            // Actualizar tabla de partidas (solo local salvo que exista endpoint para actualizar)
+            Partida.GanadorId = winner.JugadorId;
+            Partida.FechaFin = DateTime.UtcNow;
+
+            // Si dispones de un endpoint para actualizar partida, llamalo aqui.
+
+
+            // No hacemos actualizacion de estadisticas de jugadores aquí porque el API debe exponer un endpoint para ello.
+            return; // El juego termina
+        }
+
+        // Comprobar empate
+        esEmpate = board.All(cell => cell != null);
+        if (esEmpate)
+        {
+            Partida.FechaFin = DateTime.UtcNow;
+            return; // El juego termina
+        }
+    }
+
+    private JugadorResponse? CheckForWinner()
+    {
+        var winningLines = new[]
+        {
+ new[] {0,1,2}, new[] {3,4,5}, new[] {6,7,8},// Horizontales
+ new[] {0,3,6}, new[] {1,4,7}, new[] {2,5,8},// Verticales
+ new[] {0,4,8}, new[] {2,4,6}// Diagonales
+ };
+
+        foreach (var line in winningLines)
+        {
+            var (a, b, c) = (line[0], line[1], line[2]);
+            if (board[a] != null && board[a]?.JugadorId == board[b]?.JugadorId && board[a]?.JugadorId == board[c]?.JugadorId)
+            {
+                return board[a];
+            }
+        }
+
+        return null; // No hay ganador
+    }
+
+    private async Task RestartGame()
+    {
+
+        // Reiniciar estado local
+        board = new JugadorResponse?[9];
+        _currentPlayerType = jugadorX;
+        winner = null;
+        esEmpate = false;
+        Partida = new PartidaLocal();
+
+        // Opcional: crear nueva partida en servidor si lo deseas
+        // var create = await partidasApiService.PostPartida(jugadorX?.JugadorId ??0, jugadorO?.JugadorId ??0);
+    }
+
+    private string GetPlayerClass(JugadorResponse? jugador)
+    {
+        if (jugador == null) return string.Empty;
+        return jugador.JugadorId == jugadorX?.JugadorId ? "player-x" : "player-o";
+    }
+
+    private string GetSymbol(JugadorResponse? jugador)
+    {
+        if (jugador == null) return string.Empty;
+        return jugador.JugadorId == jugadorX?.JugadorId ? "X" : "O";
+    }
+}

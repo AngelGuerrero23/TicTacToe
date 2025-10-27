@@ -10,4 +10,9 @@ public record JugadorResponse(
     int jugadorId,
     string Nombres,
     string Email
-    );
+)
+{
+    // Backwards-compatible PascalCase aliases used by the UI
+    public int JugadorId => jugadorId;
+    public string JugadorName => Nombres;
+}

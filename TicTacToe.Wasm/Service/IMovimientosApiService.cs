@@ -1,7 +1,7 @@
 ﻿using TicTacToeApi.shared;
 using TicTacToeApi.shared.DTO;
 
-namespace TicTacToe.Services;
+namespace TicTacToe.Wasm.Service;
 
 public interface IMovimientosApiService
 {
