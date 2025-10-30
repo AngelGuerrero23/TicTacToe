@@ -55,7 +55,7 @@
                 return $"🏆 ¡Ganador: {winner.JugadorName}!";
             return esEmpate
                 ? "🤝 ¡Es un empate!"
-                : $"Turno de: {(_currentPlayerType == jugadorX ? jugadorX?.JugadorName: jugadorO?.JugadorName)}";
+                : $"Turno de: {(_currentPlayerType == jugadorX ? jugadorX?.JugadorName : jugadorO?.JugadorName)}";
         }
     }
 
@@ -75,7 +75,7 @@
 
         StateHasChanged();
 
-        if(Partida.PartidaId==0)
+        if (Partida.PartidaId == 0)
         {
             Partida.Jugador1Id = jugadorX?.JugadorId ?? 0;
             Partida.Jugador2Id = jugadorO?.JugadorId ?? 0;
@@ -98,14 +98,14 @@
         int columna = index % 3;
 
         var movimiento = new Movimientos
-            {
-                PartidaId = Partida.PartidaId,
-                JugadorId = _currentPlayerType?.JugadorId ?? 0,
-                PosicionFila = fila,
-                PosicionColumna = columna,
-                FechaMovimiento = DateTime.UtcNow
+        {
+            PartidaId = Partida.PartidaId,
+            JugadorId = _currentPlayerType?.JugadorId ?? 0,
+            PosicionFila = fila,
+            PosicionColumna = columna,
+            FechaMovimiento = DateTime.UtcNow
 
-            };
+        };
         await movimientosService.Guardar(movimiento);
 
         Partida.EstadoTablero = string.Join("", board.Select(c => c == null ? " " : (c == jugadorX ? "X" : "O")));
@@ -196,13 +196,13 @@
 
     private string GetPlayerClass(Jugadores? jugador)
     {
-        if (jugador==null) return "";
-        return jugador.JugadorId == jugadorX?.JugadorId ?"player-x" : "player-o";
+        if (jugador == null) return "";
+        return jugador.JugadorId == jugadorX?.JugadorId ? "player-x" : "player-o";
     }
 
     private string GetSymbol(Jugadores? jugador)
     {
         if (jugador == null) return "";
-        return jugador.JugadorId == jugadorX?.JugadorId? "X" : "O";
+        return jugador.JugadorId == jugadorX?.JugadorId ? "X" : "O";
     }
 }

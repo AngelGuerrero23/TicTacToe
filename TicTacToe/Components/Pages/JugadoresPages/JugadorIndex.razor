@@ -1,6 +1,6 @@
 ﻿@page "/Jugador/Index"
-@using TicTacToe.Models
-@inject JugadoresService jugadoresService
+
+@inject IJugadoresApiService jugadoresApiService
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
@@ -27,13 +27,13 @@
             <div class="col-3">
                 <InputSelect class="form-select" @bind-Value="Filtro">
                     <option value="" selected disabled>Elija una opción</option>
-                    <option value="Jugador">Jugador</option>
-                    <option value="Partidas">Partidas</option>
+                    <option value="Nombres">Nombre</option>
+                    <option value="Email">Email</option>
                 </InputSelect>
             </div>
             <div class="col-4">
                 <div class="input-group">
-                    <input class="form-control" @bind="ValorFiltro" placeholder="Buscar"/>
+                    <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
                     <button type="button" class="btn btn-outline-dark" @onclick="Buscar">
                         <i class="fa fa-search"></i> Buscar
                     </button>
@@ -49,11 +49,11 @@
 
     <!-- Body -->
     <div class="card-body p-0">
-        @if (ListaJugadores == null)
+        @if (ListaJugadorResponse == null)
         {
             <p class="m-3"><em>Cargando jugadores...</em></p>
         }
-        else if (!ListaJugadores.Any())
+        else if (!ListaJugadorResponse.Any())
         {
             <div class="alert alert-info m-3">No hay jugadores registrados.</div>
         }
@@ -62,29 +62,19 @@
             <table class="table table-striped table-bordered mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th>ID</th>
                         <th>Nombre</th>
-                        <th>Victorias</th>
-                        <th>Derrotas</th>
-                        <th>Empates</th>
-                        <th>Acciones</th>
+                        <th>Email</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var jugador in ListaJugadores)
+                    @foreach (var jugador in ListaJugadorResponse)
                     {
                         <tr>
-                            <td>@jugador.JugadorId</td>
-                            <td>@jugador.JugadorName</td>
-                            <td>@jugador.Victorias</td>
-                            <td>@jugador.Derrotas</td>
-                            <td>@jugador.Empates</td>
+                            <td>@jugador.Nombres</td>
+                            <td>@jugador.Email</td>
                             <td>
                                 <button class="bi bi-pencil-square btn-primary me-2"
-                                        @onclick="() => Editar(jugador.JugadorId)">
-                                </button>
-                                <button class="bi bi-trash btn-danger"
-                                        @onclick="() => Eliminar(jugador.JugadorId)">
+                                        @onclick="() => Editar(jugador.jugadorId)">
                                 </button>
                             </td>
                         </tr>
@@ -95,49 +85,57 @@
     </div>
 
     <!-- Footer -->
-    @if (ListaJugadores != null && ListaJugadores.Any())
+    @if (ListaJugadorResponse != null && ListaJugadorResponse.Any())
     {
         <div class="card-footer text-end">
-            <span class="me-3">Cantidad: @ListaJugadores.Count()</span>
-            <span class="me-3">Victorias: @ListaJugadores.Sum(v => v.Victorias)</span>
-            <span class="me-3">Derrotas: @ListaJugadores.Sum(d => d.Derrotas)</span>
-            <span>Empates: @ListaJugadores.Sum(e => e.Empates)</span>
+            <span class="me-3">Cantidad: @ListaJugadorResponse.Count()</span>
         </div>
     }
 </div>
 
 @code {
-    public List<Jugadores>? ListaJugadores { get; set; } = new List<Jugadores>();
+    public List<JugadorResponse>? ListaJugadorResponse { get; set; } = new List<JugadorResponse>();
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
+        await CargarJugadores();
     }
+
+    public async Task CargarJugadores()
+    {
+        var Response = await jugadoresApiService.GetJugadoresAsync();
+
+        if (Response is Resource<List<JugadorResponse>>.Success succes)
+        {
+            ListaJugadorResponse = succes.Data;
+        }
+        else if (Response is Resource<List<JugadorResponse>>.Error error)
+        {
+            Console.WriteLine($"Hay un error: {error.Message}");
+        }
+
+    }
+
     private async Task Buscar()
     {
         if (!string.IsNullOrWhiteSpace(ValorFiltro))
         {
-            if (Filtro == "Jugador")
+            await CargarJugadores();
+
+            if (Filtro == "Nombres")
             {
-                ListaJugadores = await jugadoresService.Listar(j => j.JugadorName.ToLower().Contains(ValorFiltro.ToLower()));
+                ListaJugadorResponse = ListaJugadorResponse.Where(j => j.Nombres.ToLower().Contains(ValorFiltro.ToLower())).ToList();
             }
-            else if (Filtro == "Partidas")
+            else if (Filtro == "Email")
             {
-                ListaJugadores = await jugadoresService.Listar(j => j.Victorias.ToString().Contains(ValorFiltro.ToLower()));
+                ListaJugadorResponse = ListaJugadorResponse.Where(j => j.Email.ToLower().Contains(ValorFiltro.ToLower())).ToList();
             }
         }
         else
         {
-            ListaJugadores = await jugadoresService.Listar(e => e.JugadorId > 0);
+            await CargarJugadores();
         }
     }
     private void Editar(int id)
@@ -145,19 +143,6 @@
         navigationManager.NavigateTo($"/Jugador/Edit/{id}");
     }
 
-    private async Task Eliminar(int id)
-    {
-        try
-        {
-            var eliminado = await jugadoresService.Eliminar(id);
-            if (eliminado)
-            {
-                ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-    }
+
+
 }

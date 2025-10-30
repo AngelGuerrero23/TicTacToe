@@ -2,7 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using TicTacToe.DAL
 @using Microsoft.AspNetCore.Components
-@inject JugadoresService jugadoresService
+@inject IJugadoresApiService jugadoresService
 @rendermode InteractiveServer
 @inject NavigationManager navigationManager
 
@@ -10,92 +10,57 @@
 <link href="app.css" rel="stylesheet" />
 
 <PageTitle>Create</PageTitle>
-<EditForm Model="Jugador" OnValidSubmit="Guardar">
-    <DataAnnotationsValidator/>
 
-        <div class="container">
-            <div class="card shadow-lg">
-                <div class="card-header text-center">
-                    <h5 class="card-title">Crear Jugador</h5>
-                </div>
-                @*Body*@
-                <div class="card-body">
-                    @*JugadorId*@
-                    <div class="mb-3">
-                        <label class="form-label"><strong>JugadorId</strong></label>
-                        <InputNumber class="form-control" @bind-value="Jugador.JugadorId" readonly></InputNumber>
-                    </div>
-                    @*JugadorName*@
-                <div class="mb-3">
-                        <label class="form-label"><strong>JugadorName</strong></label>
-                        <InputText class="form-control" @bind-value="Jugador.JugadorName"></InputText>
-                        <ValidationMessage For="(()=>Jugador.JugadorName)"/>
-                    </div>
-                    @*Victorias*@
-                <div class="mb-3">
-                        <label class="form-label"><strong>Victorias</strong></label>
-                        <InputNumber class="form-control" @bind-value="Jugador.Victorias"></InputNumber>
-                        <ValidationMessage For="(()=>Jugador.Victorias)"></ValidationMessage>
-                    </div>
-                    @*Derrotas*@
-                <div class="mb-3">
-                        <label class="form-label"><strong>Derrotas</strong></label>
-                        <InputNumber class="form-control" @bind-Value="Jugador.Derrotas"></InputNumber>
-                        <ValidationMessage For="(()=>Jugador.Derrotas)"></ValidationMessage>
-                    </div>
-                    @*Empates*@
-                <div class="mb-3">
-                        <label class="form-label"><strong>Empates</strong></label>
-                        <InputNumber class="form-control" @bind-Value="Jugador.Empates"></InputNumber>
-                        <ValidationMessage For="(()=>Jugador.Empates)"></ValidationMessage>
-                </div>
-               @if(ShowAlert)
-                {
-                        <div class="alert alert-primary" role="alert">
-                            ¡Jugador agregado exitosamente!
-                        </div>
-                }
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h5 class="card-title">Crear Jugador</h5>
+        </div>
+        @*Body*@
+        <div class="card-body">
+
+            @*Nombre*@
+            <div class="mb-3">
+                <label class="form-label"><strong>Nombre</strong></label>
+                <InputText class="form-control" @bind-value="Nombres"></InputText>
             </div>
-                
-                @*footer*@
-                <div class="card-footer text-center mt-2">
-                    <a href="/Jugador/Index" class="btn btn-secondary"><span class="bi bi-arrow-left"></span>Volver</a>
-                    <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
-                </div>
+            @*Email*@
+            <div class="mb-3">
+                <label class="form-label"><strong>Email</strong></label>
+                <InputText class="form-control" @bind-value="Email"></InputText>
+            </div>
+
+            @*footer*@
+            <div class="card-footer text-center mt-2">
+                <a href="/Jugador/Index" class="btn btn-secondary"><span class="bi bi-arrow-left"></span>Volver</a>
+                <button type="button" class="btn btn-primary bi bi-floppy" @onclick="Guardar"> Guardar </button>
             </div>
         </div>
-</EditForm>
+    </div>
+</div>
 @code {
     [Parameter]
     public int JugadorId { get; set; }
-
-    public Jugadores Jugador { get; set; } = new Jugadores();
+    public string Nombres { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public string Mensaje { get; set; } = string.Empty;
-
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     ListaJugadores = await jugadoresService.Listar(j => j.JugadorId > 0);
-    // }
 
     public async Task Guardar()
     {
-        var creado = await jugadoresService.Guardar(Jugador);
-
-        if (creado)
+        var guardado = await jugadoresService.PostJugador(Nombres, Email);
+        if (guardado is Resource<JugadorResponse>.Success ready)
         {
+            await Task.Delay(2000);
+            navigationManager.NavigateTo("/Jugador/Index");
             ShowAlert = true;
-            Jugador = new Jugadores();
+        }
 
-        }
-        else
-        {
-            Mensaje = "No se pudo guardar correctamente";
-        }
+
     }
 
     private bool ShowAlert = false;
     private string AlertMessage = string.Empty;
-    private string AlertType = "sucess"; 
+    private string AlertType = "sucess";
 
     private void TriggerAlert()
     {

@@ -30,6 +30,16 @@ namespace TicTacToe
             builder.Services.AddScoped<PartidasService>();
             builder.Services.AddScoped<MovimientosService>();
 
+            builder.Services.AddHttpClient<IJugadoresApiService, JugadoresApiService>(client =>
+            {
+                client.BaseAddress = new Uri("https://gestionhuacalesapi.azurewebsites.net/");
+            });
+
+            builder.Services.AddHttpClient<IPartidasApiService, PartidasApiService>(client =>
+            {
+                client.BaseAddress = new Uri("https://gestionhuacalesapi.azurewebsites.net/");
+            });
+
             var app = builder.Build();
             
             // Configure the HTTP request pipeline.
