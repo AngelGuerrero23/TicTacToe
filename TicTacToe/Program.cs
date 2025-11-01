@@ -11,8 +11,6 @@ namespace TicTacToe
         {
             var builder = WebApplication.CreateBuilder(args);
 
-
-
              //Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
@@ -22,6 +20,7 @@ namespace TicTacToe
 
             //Para agregar el contexto al builder con el ConStr
             builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(ConStr));
+
 
             //Inyeccion del service
             builder.Services.AddScoped<Contexto>();
