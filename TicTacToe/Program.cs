@@ -40,6 +40,11 @@ namespace TicTacToe
                 client.BaseAddress = new Uri("https://gestionhuacalesapi.azurewebsites.net/");
             });
 
+            builder.Services.AddHttpClient<IMovimientosApiService, MovimientosApiService>(client =>
+            {
+                client.BaseAddress = new Uri("https://gestionhuacalesapi.azurewebsites.net/");
+            });
+
             var app = builder.Build();
             
             // Configure the HTTP request pipeline.

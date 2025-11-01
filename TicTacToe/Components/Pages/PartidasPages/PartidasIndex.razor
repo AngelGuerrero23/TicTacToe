@@ -1,6 +1,7 @@
 ﻿@page "/Partidas/Index"
 @using TicTacToe.Models;
 @inject PartidasService partidasService
+@inject JugadoresApiService jugadoresApiService
 
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
@@ -108,9 +109,26 @@
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
 
+    public List<JugadorResponse> ListaJugadorResponse { get; set; } = new List<JugadorResponse>();
+
     protected override async Task OnInitializedAsync()
     {
-        ListaPartidas = await partidasService.Listar(p => p.PartidaId > 0);
+
+        await CargarJugadores();
+    }
+    public async Task CargarJugadores()
+    {
+        var Response = await jugadoresApiService.GetJugadoresAsync();
+
+        if (Response is Resource<List<JugadorResponse>>.Success succes)
+        {
+            ListaJugadorResponse = succes.Data;
+        }
+        else if (Response is Resource<List<JugadorResponse>>.Error error)
+        {
+            Console.WriteLine($"Hay un error: {error.Message}");
+        }
+
     }
 
     private async Task Buscar()

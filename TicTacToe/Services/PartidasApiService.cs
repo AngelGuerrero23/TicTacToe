@@ -31,7 +31,7 @@ public class PartidasApiService(HttpClient httpClient) : IPartidasApiService
         }
     }
 
-    public async Task<Resource<PartidaResponse>> PostPartida(int jugador1, int jugador2)
+    public async Task<Resource<PartidaResponse>> PostPartida(int jugador1, int? jugador2)
     {
         var request = new PartidaRequest(jugador1, jugador2);
         try

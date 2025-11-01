@@ -3,15 +3,14 @@
 @inject NavigationManager Navigation
 @using TicTacToe.Models;
 @using TicTacToe.Services;
-@inject JugadoresService jugadoresService;
-@inject PartidasService partidasService;
+@inject IJugadoresApiService jugadoresApiService
+@inject IPartidasApiService partidasApiService
 <PageTitle>TicTacToe</PageTitle>
 
 <div class="container mx-auto max-w-lg p-6 bg-white rounded-lg shadow-xl text-center">
 
     <div class="game-container">
-        @if (!gameStarted)
-        {
+
             <!-- PANTALLA DE SELECCIÓN DE JUGADOR -->
             <div class="selection-screen">
                 <h1>Elige tu jugador</h1>
@@ -20,9 +19,9 @@
                     <label class="form-label"><strong>Jugador X</strong></label>
                     <InputSelect class="form-control" @bind-Value="jugador1Id">
                         <option value="">Seleccione un jugador</option>
-                        @foreach(var jugador in jugadores)
+                        @foreach(var jugador in ListaJugadorResponse)
                             {
-                                <option value="@jugador.JugadorId">@jugador.JugadorName</option>
+                                <option value="@jugador.jugadorId">@jugador.Nombres</option>
                             }
                             
                         }
@@ -32,26 +31,21 @@
                         <label class="form-label"><strong>Jugador 0</strong></label>
                         <InputSelect class="form-control" @bind-Value="jugador2Id">
                             <option value="">Seleccione un jugador</option>
-                            @foreach(var jugador in jugadores)
+                            @foreach(var jugador in ListaJugadorResponse)
                             {
-                                <option value="@jugador.JugadorId" disabled="@(jugador.JugadorId==jugador1Id)">@jugador.JugadorName</option> 
+                                <option value="@jugador.jugadorId" disabled="@(jugador.jugadorId==jugador1Id)">@jugador.Nombres</option> 
 
                             }
                     </InputSelect>
                     </div>
                 </div>
                 <button class="btn btn-success btn-lg mt-4"
-                        disabled="@(jugador1Id == null || jugador2Id==null || jugador1Id == jugador2Id)"
+                        disabled="@(jugador1Id == null || jugador1Id == jugador2Id)"
                         @onclick="StartGame">
                     Iniciar Partida
                 </button>
             </div>
-            
-        }
-        else
-        {
-
-        }
+           
     </div>
 </div>
 
@@ -59,50 +53,43 @@
 
 @code {
 
-    private bool gameStarted;
-    private List<Jugadores> jugadores = new List<Jugadores>();
-
-    private int? jugador1Id;
-
-    private int? jugador2Id;
-    private int? partidaIdCreada;
-
+    private List<JugadorResponse> ListaJugadorResponse = new List<JugadorResponse>();
+    public int jugador1Id;
+    public int? jugador2Id;
 
 
     protected override async Task OnInitializedAsync()
     {
-        jugadores = await jugadoresService.Listar(jugador1Id => true);
+        await CargarJugadores();
     }
 
+    public async Task CargarJugadores()
+    {
+        var Response = await jugadoresApiService.GetJugadoresAsync();
+
+        if (Response is Resource<List<JugadorResponse>>.Success succes)
+        {
+            ListaJugadorResponse = succes.Data;
+        }
+        else if (Response is Resource<List<JugadorResponse>>.Error error)
+        {
+            Console.WriteLine($"Hay un error: {error.Message}");
+        }
+
+    }
 
     private async Task StartGame()
     {
-        if (jugador1Id != null && jugador2Id != null && jugador1Id != jugador2Id)
-        {
-            var nuevaPartida = new Partidas
-            {
-                Jugador1Id = jugador1Id.Value,
-                Jugador2Id = jugador2Id.Value,
-                EstadoPartida = "En Espera",
-                FechaInicio = DateTime.Now,
-                TurnoJugadorId = jugador1Id.Value,
-                EstadoTablero = ""
-            };
 
-            var guardado = await partidasService.Guardar(nuevaPartida);
+        var guardado = await partidasApiService.PostPartida(jugador1Id, jugador2Id);
 
-            if(guardado)
+            if(guardado is Resource<PartidaResponse>.Success success)
             {
-                gameStarted = true;
-                Navigation.NavigateTo($"/game/{jugador1Id}/{jugador2Id}");
+                Navigation.NavigateTo($"/game/{success.Data.PartidaId}");
             }
-            
-            
+    
         }
     }
 
-    private void RestartGame()
-    {
-        gameStarted = false;
-    }
+
 }
