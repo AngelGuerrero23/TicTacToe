@@ -1,21 +1,15 @@
 ﻿@page "/Partidas/Index"
 @using TicTacToe.Models;
-@inject PartidasService partidasService
-@inject JugadoresApiService jugadoresApiService
-
+@inject IPartidasApiService partidasService
+@inject IJugadoresApiService jugadoresApiService
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
-
-@* MainLayout.razor *@
-<link href="app.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 
 <PageTitle>Partidas</PageTitle>
 
 <div class="card shadow">
     <!-- Header -->
-    <div class="card-header  text-black">
+    <div class="card-header text-black">
         <h3 class="mb-0">Listado de Partidas</h3>
         <div class="row mt-2">
             <div class="col-3">
@@ -32,10 +26,6 @@
                     <option value="PartidaId">Partida Id</option>
                     <option value="Jugador1Id">Jugador 1</option>
                     <option value="Jugador2Id">Jugador 2</option>
-                    <option value="EstadoPartida">Estado Partida</option>
-                    <option value="GanadorId">Ganador</option>
-                    <option value="FechaInicio">Fecha Inicio</option>
-                    <option value="FechaFin">Fecha Fin</option>
                 </InputSelect>
             </div>
             <div class="col-4">
@@ -47,7 +37,7 @@
                 </div>
             </div>
             <div class="col-4">
-                <a href="/Partidas/Create" class="btn btn-success">
+                <a href="/" class="btn btn-success">
                     <span class="bi bi-plus-circle"></span> Crear Nueva Partida
                 </a>
             </div>
@@ -56,117 +46,122 @@
 
     <!-- Body -->
     <div class="card-body p-0">
-        <table class="table table-striped table-bordered mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>PartidaId</th>
-                    <th>Jugador1</th>
-                    <th>Jugador2</th>
-                    <th>EstadoPartida</th>
-                    <th>EstadoTablero</th>
-                    <th>Ganador</th>
-                    <th>FechaInicio</th>
-                    <th>FechaFin</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var partida in ListaPartidas)
-                {
+        @if (ListaPartidas == null)
+        {
+            <p>Cargando...</p>
+        }
+        else
+        {
+            <table class="table table-striped table-bordered mb-0">
+                <thead class="table-dark">
                     <tr>
-                        <td>@partida.PartidaId</td>
-                        <td>@partida.Jugador1.JugadorName</td>
-                        <td>@partida.Jugador2.JugadorName</td>
-                        <td>@partida.EstadoPartida</td>
-                        <td>@partida.EstadoTablero</td>
-                        <td>@(partida.Ganador != null ? partida.Ganador.JugadorName : "Sin ganador")</td>
-                        <td>@partida.FechaInicio.ToLocalTime().ToString("yyyy-MM-dd hh:mm")</td>
-                        <td>@(partida.FechaFin.HasValue? partida.FechaFin.Value.ToLocalTime().ToString("yyyy-MM-dd hh:mm"):"")</td>
-                        <td>
-                            <button class="bi bi-pencil-square btn-primary me-2"
-                                    @onclick="() => Editar(partida.PartidaId)">
-                            </button>
-                            <button class="bi bi-trash btn-danger"
-                                    @onclick="() => Eliminar(partida.PartidaId)">
-                            </button>
-                        </td>
+                        <th>PartidaId</th>
+                        <th>Jugador1</th>
+                        <th>Jugador2</th>
+                        <th>Acciones</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var partida in ListaPartidas)
+                    {
+                        <tr>
+                            <td>@partida.PartidaId</td>
+                            <td>@ObtenerNombreJugador(partida.Jugador1Id)</td>
+                            <td>@(partida.Jugador2Id.HasValue ? ObtenerNombreJugador(partida.Jugador2Id.Value) : "Esperando jugador...")</td>
+                            <td>
+                                @if (!partida.Jugador2Id.HasValue)
+                                {
+                                    <button class="btn btn-primary btn-sm" @onclick="() => UnirsePartida(partida.PartidaId)">
+                                        <i class="bi bi-controller"></i> Unirse
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Partida llena</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 
     <!-- Footer -->
     <div class="card-footer text-end">
-        Cantidad: @ListaPartidas.Count()
+        Cantidad: @(ListaPartidas?.Count ?? 0)
     </div>
 </div>
 
-
 @code {
-    public List<Partidas>? ListaPartidas { get; set; } = new List<Partidas>();
-
-    public string Filtro { get; set; } = string.Empty;
-    public string ValorFiltro { get; set; } = string.Empty;
-
-    public List<JugadorResponse> ListaJugadorResponse { get; set; } = new List<JugadorResponse>();
+    private List<PartidaResponse> ListaPartidas { get; set; }
+    private string Filtro { get; set; } = string.Empty;
+    private string ValorFiltro { get; set; } = string.Empty;
+    private List<JugadorResponse> ListaJugadorResponse { get; set; } = new List<JugadorResponse>();
 
     protected override async Task OnInitializedAsync()
     {
-
         await CargarJugadores();
+        await CargarPartidas();
     }
-    public async Task CargarJugadores()
+
+    private async Task CargarPartidas()
     {
-        var Response = await jugadoresApiService.GetJugadoresAsync();
-
-        if (Response is Resource<List<JugadorResponse>>.Success succes)
+        var response = await partidasService.GetPartidasAsync();
+        if (response is Resource<List<PartidaResponse>>.Success success)
         {
-            ListaJugadorResponse = succes.Data;
+            ListaPartidas = success.Data;
         }
-        else if (Response is Resource<List<JugadorResponse>>.Error error)
+        else if (response is Resource<List<PartidaResponse>>.Error error)
         {
-            Console.WriteLine($"Hay un error: {error.Message}");
+            Console.WriteLine($"Error al cargar partidas: {error.Message}");
         }
+    }
 
+    private async Task CargarJugadores()
+    {
+        var response = await jugadoresApiService.GetJugadoresAsync();
+        if (response is Resource<List<JugadorResponse>>.Success success)
+        {
+            ListaJugadorResponse = success.Data;
+        }
+    }
+
+    private string ObtenerNombreJugador(int jugadorId)
+    {
+        return ListaJugadorResponse.FirstOrDefault(j => j.jugadorId == jugadorId)?.Nombres ?? $"Jugador {jugadorId}";
+    }
+
+    private async Task UnirsePartida(int partidaId)
+    {
+        var response = await partidasService.GetPartidaAsync(partidaId);
+        if (response is Resource<PartidaResponse>.Success success)
+        {
+            var partida = success.Data;
+            if (partida != null)
+            {
+                navigationManager.NavigateTo($"/game/{partidaId}");
+            }
+        }
+        else if (response is Resource<PartidaResponse>.Error error)
+        {
+            Console.WriteLine($"Error al unirse a la partida: {error.Message}");
+        }
     }
 
     private async Task Buscar()
     {
-        if (string.IsNullOrWhiteSpace(ValorFiltro))
-        {   ListaPartidas = await partidasService.Listar(p => p.PartidaId > 0);
-            return;
+        await CargarPartidas();
+        if (!string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            ListaPartidas = ListaPartidas.Where(p => 
+                Filtro switch
+                {
+                    "PartidaId" => p.PartidaId.ToString().Contains(ValorFiltro),
+                    "Jugador1Id" => p.Jugador1Id.ToString().Contains(ValorFiltro),
+                    "Jugador2Id" => p.Jugador2Id?.ToString()?.Contains(ValorFiltro) ?? false,
+                    _ => true
+                }).ToList();
         }
-
-        string filtroValor = ValorFiltro.ToLower();
-
-        if (Filtro == "PartidaId")
-            ListaPartidas = await partidasService.Listar(p => p.PartidaId.ToString().Contains(filtroValor));
-        else if (Filtro == "Jugador1Id")
-            ListaPartidas = await partidasService.Listar(p => p.Jugador1Id.ToString().Contains(filtroValor));
-        else if (Filtro == "Jugador2Id")
-            ListaPartidas = await partidasService.Listar(p => p.Jugador2Id.ToString().Contains(filtroValor));
-        else if (Filtro == "EstadoPartida")
-            ListaPartidas = await partidasService.Listar(p => p.EstadoPartida.ToLower().Contains(filtroValor));
-        else if (Filtro == "GanadorId")
-            ListaPartidas = await partidasService.Listar(p => p.GanadorId.ToString().Contains(filtroValor));
-        else if (Filtro == "FechaInicio")
-            ListaPartidas = await partidasService.Listar(p => p.FechaInicio.ToString().ToLower().Contains(filtroValor));
-        else if (Filtro == "FechaFin")
-            ListaPartidas = await partidasService.Listar(p => p.FechaFin.ToString()!.ToLower().Contains(filtroValor));
-        else
-            ListaPartidas = await partidasService.Listar(p => p.PartidaId > 0);
-    }
-
-    private void Editar(int id)
-    {
-        navigationManager.NavigateTo($"/Partidas/Edit/{id}");
-    }
-
-    private async Task Eliminar(int id)
-    {
-        var eliminado = await partidasService.Eliminar(id);
-        if (eliminado)
-            ListaPartidas = await partidasService.Listar(p => p.PartidaId > 0);
     }
 }

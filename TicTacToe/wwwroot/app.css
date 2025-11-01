@@ -236,5 +236,170 @@ h3 {
 }
 
 
+/*Estilo para la pantalla del juego index TicTacToe*/
 
 
+/* Variables para colores */
+:root {
+    --bg-dark: #1a1a2e; /* Fondo oscuro */
+    --neon-blue: #00ffff; /* Azul cian neón */
+    --neon-green: #00ff00; /* Verde neón para botón principal */
+    --input-bg: #2d2d4d; /* Fondo de inputs/selects */
+    --input-border: #4a4a6e; /* Borde de inputs/selects */
+    --text-light: #e0e0e0;
+}
+
+/*body {
+    background-color: var(--bg-dark);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;*/ /* Color de texto por defecto */
+    /*display: flex;
+    justify-content: center;
+    align-items: flex-start;*/ /* Alinea arriba */
+    /*min-height: max-content;
+    margin: 0;
+    padding-top: 50px;
+}*/
+
+/*.selection-screen {
+    background-color: rgba(0, 0, 0, 0.4);*/ /* Fondo ligeramente transparente */
+    /*padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);*/ /* Sombra neón */
+    /*text-align: center;
+    width: 100%;
+    max-width: 600px;
+    box-sizing: border-box;
+}*/
+
+    /*.selection-screen h1 {
+        font-size: 2.8em;
+        margin-bottom: 30px;
+        text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 30px var(--neon-blue);
+        color: var(--neon-blue);
+        letter-spacing: 2px;
+    }*/
+
+        /* Ajuste para el segundo h1 */
+        /*.selection-screen h1:nth-of-type(2) {
+            font-size: 2em;
+            margin-top: 40px;
+            margin-bottom: 20px;*/ /* Reducir el margen inferior para que esté más cerca del input */
+            /*text-shadow: 0 0 8px var(--neon-blue), 0 0 15px var(--neon-blue);
+        }*/
+
+
+.form-label {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    color: black;
+    font-weight: bold; /* Mantiene la negrita de Bootstrap */
+}
+
+/* Estilos para InputSelect y input[type="number"] (form-control de Bootstrap) */
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: white;
+    font-size: 1.05em;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    -webkit-appearance: none; /* Elimina estilos nativos en Chrome/Safari */
+    -moz-appearance: none; /* Elimina estilos nativos en Firefox */
+    appearance: none; /* Elimina estilos nativos */
+}
+
+    .form-control:focus {
+        border-color: var(--neon-blue);
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        background-color: var(--input-bg); /* Asegura que el fondo no cambie */
+        color: white; /* Asegura que el texto no cambie de color */
+    }
+
+/* Estilos para los botones de Bootstrap */
+.btn-success {
+    font-weight: bold;
+    padding: 15px 30px; /* Tamaño del botón */
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.3s, background-color 0.3s, border-color 0.3s;
+}
+
+    .btn-success:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+        background-color: var(--neon-green); /* Asegura que el color no cambie mucho en hover */
+        border-color: var(--neon-green);
+    }
+
+.btn-primary {
+
+    font-weight: bold;
+    padding: 15px 30px; /* Tamaño del botón */
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.3s, background-color 0.3s, border-color 0.3s;
+}
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-blue);
+        background-color: var(--neon-blue); /* Asegura que el color no cambie mucho en hover */
+        border-color: var(--neon-blue);
+    }
+
+/* Estilos para botones deshabilitados */
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none; /* Elimina el brillo neón cuando está deshabilitado */
+    transform: none; /* Elimina la animación de hover */
+}
+
+/* Asegurarse de que las opciones del select tengan buen contraste */
+.form-control option {
+    background-color: var(--input-bg); /* Fondo de las opciones */
+    color: white; /* Color del texto de las opciones */
+}
+
+/* Ajustes para el contenedor de los selectores para mantener la estructura de Bootstrap */
+.d-flex.gap-4 {
+    justify-content: center; /* Centrar los selectores */
+    margin-bottom: 30px; /* Espacio antes del botón Iniciar Partida */
+}
+
+.d-flex.flex-column {
+    align-items: flex-start; /* Alinear labels a la izquierda dentro de su columna */
+}
+
+.form-group {
+    /* Mantenemos el estilo de form-group de Bootstrap */
+    margin-bottom: 1rem;
+    display: flex; /* Para controlar el posicionamiento del label y el input */
+    flex-direction: column; /* Colocar elementos en columna */
+    align-items: center; /* Centrar el grupo */
+    width: fit-content; /* Ajustar el ancho al contenido */
+    margin-left: auto; /* Centrar horizontalmente */
+    margin-right: auto; /* Centrar horizontalmente */
+}
+
+/* Eliminar las flechas de los input type="number" */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.container-lg {
+    font-size: 1.65rem;
+    font-display:auto;
+    border-radius: 3px 3px;
+    background-color: olivedrab;
+    background-size:cover;
+}
+.card-body {
+    flex:auto;
+    padding: initial;
+    color: var(--bs-card-color);
+}

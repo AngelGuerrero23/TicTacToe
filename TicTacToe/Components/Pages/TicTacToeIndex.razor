@@ -1,6 +1,6 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@inject NavigationManager Navigation
+@inject NavigationManager navigationManager
 @using TicTacToe.Models;
 @using TicTacToe.Services;
 @inject IJugadoresApiService jugadoresApiService
@@ -24,7 +24,6 @@
                                 <option value="@jugador.jugadorId">@jugador.Nombres</option>
                             }
                             
-                        }
                     </InputSelect>
                     </div>
                     <div class="d-flex flex-column">
@@ -44,6 +43,18 @@
                         @onclick="StartGame">
                     Iniciar Partida
                 </button>
+
+                <h1>Unirse a Partida Existente</h1>
+                <div class="form-group  mt-2">
+                    <label class="form-label" for="partidaId"><strong>ID de la Partida:</strong></label>
+                    <input id="partidaId" type="number" class="form-control" @bind="PartidaId" placeholder="ID de la partida" />
+                    <button class="btn btn-primary btn-lg mt-4"
+                            disabled="@(PartidaId <= 0)"
+                            @onclick="UnirsePartida">
+                        Unirse
+                    </button>
+                </div>
+
             </div>
            
     </div>
@@ -54,6 +65,7 @@
 @code {
 
     private List<JugadorResponse> ListaJugadorResponse = new List<JugadorResponse>();
+    private int PartidaId{ get; set; }
     public int jugador1Id;
     public int? jugador2Id;
 
@@ -83,13 +95,35 @@
 
         var guardado = await partidasApiService.PostPartida(jugador1Id, jugador2Id);
 
-            if(guardado is Resource<PartidaResponse>.Success success)
-            {
-                Navigation.NavigateTo($"/game/{success.Data.PartidaId}");
-            }
-    
+        if(guardado is Resource<PartidaResponse>.Success success)
+        {
+            navigationManager.NavigateTo($"/game/{success.Data.PartidaId}");
         }
+
     }
 
+    public async Task UnirsePartida()
+    {
+        var partida = (await partidasApiService.GetPartidaAsync(PartidaId)).Data;
 
+        jugador2Id = partida.Jugador2Id;
+
+        if (jugador1Id == partida.Jugador1Id || jugador2Id == partida.Jugador2Id)
+                navigationManager.NavigateTo($"/game/{PartidaId}");
+            else navigationManager.NavigateTo($"/game/{PartidaId}");
+
+        if (jugador1Id != 0) jugador2Id = partida.Jugador2Id; else jugador1Id = partida.Jugador1Id;
+
+        var modificado = await partidasApiService.PutPartida(PartidaId, jugador1Id, jugador2Id);
+        if(modificado is Resource<PartidaResponse>.Success)
+        {
+            navigationManager.NavigateTo($"/game/{PartidaId}");
+        }
+        else if(modificado is Resource<PartidaResponse>.Error error)
+        {
+            Console.WriteLine("Error al unirse a la partida: " + error.Message);
+        }
+    }
 }
+
+
